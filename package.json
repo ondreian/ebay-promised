@@ -1,6 +1,6 @@
 {
   "name": "ebay-promised",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "promise wrapped Ebay requests with sensible response parsers",
   "main": "lib/index.js",
   "dependencies": {
