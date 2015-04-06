@@ -21,7 +21,7 @@ utils      = require "./utils"
 debug      = require('debug')('Ebay')
 
 # defaults for Ebay class
-defaults =
+defaults = JSON.stringify
   __fields__ : {}
   __globals__: {
     serviceName  : "Trading"
@@ -41,7 +41,7 @@ module.exports = class Ebay extends utils.Module
   @post = limit(request.post.bind(request))
   @get  = limit(request.get.bind(request))
 
-  @include defaults
+  @include JSON.parse defaults
   
   @methodize require('./definitions/calls'), (method)->
     ->
@@ -75,7 +75,7 @@ module.exports = class Ebay extends utils.Module
   fields: -> @__fields__
 
   reset: ->
-    @__fields__ = defaults.__fields__
+    @__fields__ = JSON.parse(defaults).__fields__
     @
 
   safelyApplyOptions: (options={})->
