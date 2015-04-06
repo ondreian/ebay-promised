@@ -1,0 +1,31 @@
+{
+  "name": "ebay-promised",
+  "version": "1.4.6",
+  "description": "promise wrapped Ebay requests with sensible response parsers",
+  "main": "lib/index.js",
+  "dependencies": {
+    "async": "~0.2.10",
+    "debug": "^2.1.1",
+    "ecjson": "^0.1.2",
+    "lazy.js": "^0.3.2",
+    "object-to-xml": "0.0.2",
+    "q": "~1.0.1",
+    "request-promise": "0.4.0",
+    "simple-rate-limiter": "^0.2.3",
+    "underscore": "~1.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ondreian/ebay-promised.git"
+  },
+  "keywords": [
+    "ebay",
+    "api"
+  ],
+  "author": "Benjamin Clos",
+  "license": "ISC"
+}
