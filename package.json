@@ -4,7 +4,7 @@
   "description": "promise wrapped Ebay requests with sensible response parsers",
   "main": "lib/index.js",
   "dependencies": {
-    "async": "~1.5.0",
+    "async": "~1.5.1",
     "debug": "^2.1.1",
     "ecjson": "^0.1.2",
     "lazy.js": "^0.4.2",
