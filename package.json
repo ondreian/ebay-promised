@@ -10,7 +10,7 @@
     "lazy.js": "^0.4.2",
     "object-to-xml": "1.0.0",
     "q": "~1.4.1",
-    "request-promise": "1.0.2",
+    "request-promise": "2.0.0",
     "simple-rate-limiter": "^0.2.3",
     "underscore": "~1.8.3"
   },
