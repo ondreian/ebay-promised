@@ -31,7 +31,7 @@ describe("Ebay Functionality", function () {
   
   })
 
-  it.only("handles Lists", function (done) {
+  it("handles Lists", function (done) {
     ebay.GetBidderList().run()
       .then( res => {
         expect(res.BidItemArray).to.be.array
