@@ -69,7 +69,7 @@ export default class Request extends Creatable {
 
   payload () {
     const fields  = Object.assign({}, this.state.fields)
-    const const [listKey, val] = this.listKey()
+    const [listKey, val] = this.listKey()
     if (listKey) fields[ listNode ] = Object.assign(val, this.pagination())
     return fields
   }
