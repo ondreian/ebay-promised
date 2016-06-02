@@ -1,12 +1,18 @@
 group: edge
 language: node_js
 node_js:
-  - "5.4"
-  - "4.1"
-  - "6.0"
-
+- '5.4'
+- '4.1'
+- '6.0'
 before_script:
-  - npm install -g mocha babel-cli
-  - npm run compile
-
+- npm install -g mocha babel-cli
+- npm run compile
 script: npm test
+env:
+  global:
+  - secure: brq5EdOK33qG3lQnV15+YlOQvOcSfuLR6CFqtUZASbv91g6YheRx4qC1H/Do1uBJys7g0JDVy55jD79HHTRBNZxl44IZ6eG1YHiBXlE1asXvdSEZ9BoX2+c6yDWoAke9p8QDMxVPE+TY2aJ2dCaUE0Z1dKw3f52t1ST0tpeSPW1vP60tWxnYqObgKMBtV/0+nvZpwlTEZkKJv9+rrPh4DCCqFu0zEo0eXmPnj1jaVF58v5b2tngS2KyPrnQ2b9kMQhXZ55Uj5BOi2ttC2lFq99/FpSz6/PLXyw/P3ycjMgvz8+xFOVLYqjZivRobvkQE31cnmuqhgLnSAsybhF1Olz5oQMAuFZiDTaFibdJ7ruGnH/HcHhvnXcKsPe9kJ8JpRn3wruRlVE56qAY125f5lU45LsEo30z6IhKaQBGGp2q21sIhxbH8YvJHCrrq8iN4bvx/5m3pqpTlt8ZR0BPrzhCZk5iWHUoNdhW3Ji+3gxvgfKRJF4Pn9RykA17HXeWdoN2z1xIu8tkxHdWmVjdx1IsBPhlA0iI9WJkWmeX0jkU1r26RDqgyZeYKkxF0JOB5vWJmsktGzF0+ESOcBDg/hX0YU9mo3W8PIcvjOt9iQ/NhvsC3jfmOPPaAjegLGst3Ar+xuNNodiGJ/5GjGF3URBAH0wRjGdKHwA5NnzOdqqY=
+  - secure: D0utp1z9lHT7lQOJXMQ1OJC9+8tJv2T02wIIkZTTi1H6C85Ygg+cpjmfra6PBhjJw2eAJBlviv10+Eq9cCFN3z7SnaVSI7EPlLEH8StR4AwfvSfyOYY04t8vPqV4IFQEDzILdJt2Jz8woPtlrpH/52+SNjN8gUY/gJf+PBPIJQHVjXD3w0TeC/ywq2tBhWLx880WLlJAzHPXvbcH2GKp+KpcOC4Ft7SE/q/Tk7o5NZh3szqXUcTDMBPX2OAlkB19VIRSRkywfes9MJyVaOGeSrlK3g3hRYgh2fjeuZDQgn22oW7eGdo/Bob9onuS2F+CT3Ffj4poXMAvGXk8HMnB9rtUrFho6csNVh7GEOd25SfVKdD6gpEyD0d+6Al9UJuMqOqoJwpjn1Z64gC/cPaTmhuHJtdu1DkfmBOULH7HB2IDjOI3sCalOTGZk8H0241UrDiY6pOb89SCPa4xJTGA9DLuxH4FkBcRrB9vc7f1kGYXtl7QD2/s/VFv1SbfzaH/4P5rgmDetlvW+TZOT+g36tn8n7HB/FURZMgC5qObKz5QK/TEwifbjf1naVqHFn5HbOhaMFET3j6dkv4cBFsIlSpp9zTivx5jTZAqqW8ckNFSFJPlx7FYLQCGpH8JEi9GyT2Y+/SrPgA7DHlpKn+g/CTMrxmZpgIoFXpliS2PE7c=
+  - secure: WvZXCcBThlau5O7lZsr/XbaGpL9UDH++eTF8FDsh2S7BolrQFPDeiZKAl2YNL3uM3sgt2gOR2tHjdKfBj1oEIpaLVRoXum139Bs+wmVKktRiwArhS3CLFT8euwFgroDI3kc0UjWT3hvlxIbdNmZhffcrp9QYL6P0bvUosh0oVOh+jFK8eV9GwvuwHPkSO8J+pcWhxcutLBTPWEJjHrLH11uFU6NEdziS7021UatcGOQ2+D36wllH6cosdJwI87JmN+ayTJohAE7/fbnyEQcI5OHPnb64BRUmbW3Dl51Iiviv4R+OyGjxJVixerNNZKrkqxl5yCVl5LezLl4hstqYtZc+lJYrIqskXhGlV9SLOUEbkW+wSeZISozQH3YbFaNZJH7lz5mOw6tr5ez1AeuP/JqTVgo55sk74EvQRmhAUn8RkS2YXdNCpwh/kabHNYlIcbjSDGlZy3gFU/n4wat8Z/47ZCaOsj4YmC/zClv8a6LsvjeZ/As/1QfB4TsdIL+oUrG57B4mPl/DyNj+u+MNMSvt5l3Ijf8RWJFeH69Zu0uOgskftBrNCxAty5K9qAaJWQRN8U2ivXOLn8jY2vhMX2uGzYA/IKN3/4nDJi8c0jPYt2mSi+B3Jk3RoAZuvpC6+3M4WboVaDIQBg3FScR7rXAjE3rxhoCt7dtQOd13caQ=
+before_install:
+- openssl aes-256-cbc -K $encrypted_33608139a618_key -iv $encrypted_33608139a618_iv
+  -in token.txt.enc -out token.txt -d

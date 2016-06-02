@@ -49,10 +49,10 @@ describe("Ebay Functionality", function () {
       .catch(done)
   })
 
-  it("handles large sets", function (done) {
+  it.skip("handles large sets", function (done) {
     ebay.GeteBayDetails().run()
       .then( (res)=> {
-        console.log(res.PaymentOptionDetails)
+        // TODO: write 
         done()
       })
       .catch(done)
