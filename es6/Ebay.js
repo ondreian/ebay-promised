@@ -1,14 +1,17 @@
-import Creatable   from './utils/Creatable'
-import Request     from './Request'
-import * as Errors from './errors'
+import Request   from './Request'
+import {throws}  from './errors'
 
 // dynamic definitions aggregated from crawling Ebay's API docs
-import Endpoints   from './definitions/endpoints'
-import Fields      from './definitions/fields'
-import Globals     from './definitions/globals'
-import Calls       from './definitions/calls'
+import Endpoints from './definitions/endpoints'
+import Fields    from './definitions/fields'
+import Globals   from './definitions/globals'
+import Calls     from './definitions/calls'
 
-export default class Ebay extends Creatable {
+export default class Ebay {
+  static create () {
+    return new this(...arguments)
+  }
+
   /**
    * { constructor_description }
    *
@@ -16,11 +19,18 @@ export default class Ebay extends Creatable {
    * @return     {Ebay}
    */
   constructor ( settings ) {
-    super()
     /**
      * global settings for all following Ebay requests
      */
     this.globals  = Object.assign({}, Ebay.defaults, settings)
+  }
+
+  invoke () {
+    return this.run()
+  }
+
+  run () {
+    throws.Error("Cannot run an empty Request, please define an eBay call")
   }
 }
 
@@ -30,8 +40,6 @@ Ebay.defaults = {
   , site         : 0
   , raw          : false      // return raw XML -> JSON response from Ebay
   , perPage      : 100
-  , callsPerEpoc : 3
-  , epoc         : 1000
 }
 
 Ebay.Request = Request
@@ -49,8 +57,7 @@ Calls.forEach( call => {
 
 Fields.forEach( field => {
   Ebay[field] = function _dynamicField ( val ) {
-    return Ebay
-      .create()[field](val)
+    return Ebay.create()[field](val)
   }
 
   Ebay.prototype[field] = function _dynamicField (val) {

@@ -1,5 +1,6 @@
 import {expect}  from "chai"
 import Ebay      from "../lib"
+import * as errors from "../lib/errors"
 import Fields    from "../lib/definitions/fields"
 import Globals   from "../lib/definitions/globals"
 import Calls     from "../lib/definitions/calls"
@@ -42,7 +43,7 @@ describe("Ebay.Request", function () {
     })
   })
 
-  describe.only("Ebay.Request ~ Core", function () {
+  describe("Ebay.Request ~ Core", function () {
     it("is immutable", function () {
       const first  = Ebay.Request.create()
       const frozen = first.call
@@ -59,7 +60,7 @@ describe("Ebay.Request", function () {
     it("throws when trying to change a global setting", function () {
       const req = Ebay.create().GetStore()
       expect(req).to.be.instanceOf(Ebay.Request)
-      expect( function () { req.app("thrower") }).to.throw(/cannot call/)
+      expect( function () { req.app("thrower") }).to.throw(/cannot configure/)
     })
 
     it("generates headers", function () {
@@ -67,10 +68,19 @@ describe("Ebay.Request", function () {
       expect(req.headers["X-EBAY-API-CALL-NAME"]).to.equal("GetStore")
     })
 
+    it("throw proper errors", function () {
+      expect( function () {
+        Ebay.create()[Calls[0]]().run()
+      }).to.throw(errors.No_Auth_Token_Error)
+
+      expect( function () {
+        Ebay.create().authToken("abc123")[Fields[0]](true).run()
+      }).to.throw(errors.No_Call_Error)
+    })
+
     it("finds an endpoint", function () {
       const req = Ebay.create().GetStore().ActiveList({})
       expect(req.endpoint).to.equal(Endpoints.Trading.production)
-      console.log(req.xml)
     })
   })
 })

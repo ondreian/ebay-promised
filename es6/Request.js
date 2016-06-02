@@ -1,8 +1,14 @@
 import o2x         from "object-to-xml"
 import Promise     from "bluebird"
-import {post}      from "request-promise"
-import * as errors from "./errors"
-import Creatable   from "./utils/Creatable"
+import req         from "request-promise"
+import Lazy        from "lazy.js"
+import debug       from "debug"
+import limit       from "simple-rate-limiter"
+
+import {throws}    from "./errors"
+import Parser      from "./Parser"
+
+// Definitions
 import Fields      from "./definitions/fields"
 import Endpoints   from "./definitions/endpoints"
 import Calls       from "./definitions/calls"
@@ -12,11 +18,24 @@ const SANDBOX = "sandbox"
 const PROD    = "production"
 const HEADING = 'xml version="1.0" encoding="utf-8"?'
 const LIST    = "List"
+const log     = debug("Ebay:Request")
+/**
+ * Immmutable request object for making eBay API calls
+ */
+export default class Request {
 
-export default class Request extends Creatable {
+  static create () {
+    return new this(...arguments)
+  }
+
   constructor ( previous = {} ) {
-    super()
+    /**
+     * internal immutable state
+     */
     this.state          = Object.assign({}, previous)
+    /**
+     * { item_description }
+     */
     this.state.fields   = this.state.fields  || {}
     this.state.globals  = this.state.globals || {}
 
@@ -27,55 +46,80 @@ export default class Request extends Creatable {
       , "X-EBAY-API-SITEID"              : this.globals.site || 0
       , "X-EBAY-API-APP-NAME"            : this.globals.app  || "node.js::ebay-promised"
     }
+
+    Object.freeze(this.state)
+    Object.freeze(this.headers)
+
   }
 
   get endpoint () {
-    const endpoint = Endpoints[this.globals.serviceName][ this.state.sandbox ? SANDBOX : PROD ]
+    const endpoint = Endpoints[this.globals.serviceName][ this.globals.sandbox ? SANDBOX : PROD ]
     
     return endpoint
       ? endpoint
-      : errors.throw.Invalid_Endpoint(this)
+      : throws.Invalid_Endpoint(this)
   }
 
   get globals () {
-    return this.state.globals
+    return Object.assign({}, this.state.globals)
+  }
+
+  get fieldKeys () {
+    return Object.keys(this.fields)
+  }
+
+  get fieldPairs () {
+    const fields = this.fields
+    return this.fieldKeys.map( field => [ field, fields[field] ] )
   }
 
   get fields () {
-    const fields = this.state.fields
-    return Object.keys(fields).map( field => [ field, fields[field] ] )
+    return Object.assign({}, this.state.fields)
   }
 
   get call () {
     return this.state.call
   }
 
-  get credentials () {
-    return {
-      RequesterCredentials: { eBayAuthToken: this.globals.authToken }
-    }
+  get token () {
+    return this.globals.authToken
   }
 
-  get xmlNamespace () {
+  get credentials () {
+    return { RequesterCredentials: { eBayAuthToken: this.token } }
+  }
+
+  get xmlns () {
     return `${this.call}Request xmlns="urn:ebay:apis:eBLBaseComponents"`
   }
 
   get xml () {
     return o2x({
-        [HEADING]           : null
-      , [this.xmlNamespace] : [ this.credentials, this.payload() ]
+        [HEADING]    : null
+      , [this.xmlns] : Object.assign(
+            {}
+          , this.credentials
+          , this.payload()
+        )
     })
   }
 
   payload () {
-    const fields  = Object.assign({}, this.state.fields)
-    const [listKey, val] = this.listKey()
-    if (listKey) fields[ listKey ] = Object.assign(val, this.pagination())
+    const fields  = this.fields
+    const listKey = this.listKey()
+    if (listKey !== false) {
+      fields[ listKey ] = Object.assign( fields[listKey], this.pagination() )
+    }
     return fields
   }
 
   listKey () {
-    return this.fields.filter( ([field, val]) => ~field.indexOf(LIST) )[0] || [null, null]
+    const fields = this.fieldKeys
+    while (fields.length) {
+      const field = fields.pop()
+      if ( Lazy(field).contains(LIST) ) return field
+    }
+    return false
   }
 
   pagination (page=1) {
@@ -92,10 +136,52 @@ export default class Request extends Creatable {
     return this.run()
   }
 
-  run () {
-
+  run (options = {}) {
+    if ( !this.globals.authToken ) throws.No_Auth_Token_Error()
+    if ( !this.call )              throws.No_Call_Error()
+    
+    /*
+     * use a singleton so even multiple instances of Ebay are rate limited 
+     * then even multiple simultaneous requests go in the same queue
+     */
+    return new Promise( (resolve, reject)=> {
+      Request
+        .post({
+            url     : this.endpoint
+          , headers : this.headers
+          , body    : this.xml
+        })
+        .once("limiter-exec", promise => {
+          promise
+            .then(Parser.toJSON)
+            .then(Parser.unwrap(this.call))
+            .then(Parser.clean)
+            .then(resolve)
+            .catch(reject)
+        })
+    })
+  
   }
 }
+
+/**
+ * 
+ * Ebay ratelimits to 5000 calls per day per default
+ * 
+ * source: https://go.developer.ebay.com/api-call-limits
+ * 
+ * this can be reconfigured on load if you are using 
+ * an approved compatible Application
+ * 
+ * @example
+ *   Request.post.to(1.5million).per(DAY)
+ * 
+ */
+Request.post = limit(function XMLPost () {
+  return req.post(...arguments)
+})
+.to(5000)
+.per( 1000 * 60 * 60 * 24 )
 
 Calls.forEach( call => {
   Request.prototype[call] = function requestCallSetter () {
@@ -115,6 +201,6 @@ Fields.forEach( field => {
 
 Globals.forEach( omni => {
   Request.prototype[omni] = function requestGlobalSetter (val) {
-    throw new Error(`You cannot call ${omni} on an Ebay.Request instance as it is a global setting`)
+    throws.Setting_Error(omni)
   }
 })
