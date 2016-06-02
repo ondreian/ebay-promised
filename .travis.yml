@@ -1,0 +1,12 @@
+group: edge
+language: node_js
+node_js:
+  - "5.4"
+  - "4.1"
+  - "6.0"
+
+before_script:
+  - npm install -g mocha babel-cli
+  - npm run compile
+
+script: npm test

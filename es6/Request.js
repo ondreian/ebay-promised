@@ -86,6 +86,15 @@ export default class Request extends Creatable {
       }
     }
   }
+
+  invoke () {
+    // TODO: add deprecation message
+    return this.run()
+  }
+
+  run () {
+
+  }
 }
 
 Calls.forEach( call => {
