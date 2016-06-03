@@ -7,6 +7,16 @@ import Calls       from "../lib/definitions/calls"
 import Endpoints   from "../lib/definitions/endpoints"
 
 describe("Ebay Functionality", function () {
+  // Load encrypted creds on CI
+  if (process.env.TRAVIS) {
+    
+    const env = require('./fixtures/auth.js')
+    
+    Object.keys(env).forEach( v => {
+      process.env[v] = env[v]
+    })
+  }
+
   const ebay = Ebay.create({
       authToken : process.env.EBAY_TOKEN
     , cert      : process.env.EBAY_CERT
