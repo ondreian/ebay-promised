@@ -3,34 +3,27 @@ import Ebay        from "../lib"
 import * as errors from "../lib/errors"
 import Fields      from "../lib/definitions/fields"
 import Globals     from "../lib/definitions/globals"
-import Calls       from "../lib/definitions/calls"
+import Verbs       from "../lib/definitions/verbs"
 import Endpoints   from "../lib/definitions/endpoints"
+
+process.env.EBAY_SANDBOX = true
 
 describe("Ebay Functionality", function () {
   // Load encrypted creds on CI
   if (process.env.TRAVIS) {
-    
-    const env = require('./fixtures/auth.js')
-    
-    Object.keys(env).forEach( v => {
-      process.env[v] = env[v]
-    })
+    Object.keys(require('./fixtures/auth.js')).forEach( v => process.env[v] = env[v] )
   }
 
-  const ebay = Ebay.create({
-      authToken : process.env.EBAY_TOKEN
-    , cert      : process.env.EBAY_CERT
-    , app       : process.env.EBAY_APP_ID
-    , devName   : process.env.EBAY_DEV_ID
-    , sandbox   : true
-  })
+  const ebay = Ebay.fromEnv()
 
   it("is running in sanbox", function () {
     expect(ebay.GetAccount().endpoint).to.equal(Endpoints.Trading.sandbox, "COULD NOT FIND SANDBOX")
   })
 
   it("throw proper error class", function (done) {
-    ebay.GetAccount().run()
+    ebay
+      .GetAccount()
+      .run()
       .then( ()=> {
         throw new Error("this shouldn't have happened")
       })
@@ -42,7 +35,9 @@ describe("Ebay Functionality", function () {
   })
 
   it("handles Lists", function (done) {
-    ebay.GetBidderList().run()
+    ebay
+      .GetBidderList()
+      .run()
       .then( res => {
         expect(res.BidItemArray).to.be.array
         done()
@@ -51,32 +46,51 @@ describe("Ebay Functionality", function () {
   })
 
   it("casts to Number", function (done) {
-    ebay.GetSuggestedCategories().Query("men's").run()
-      .then( res => {
-        expect(res.CategoryCount).to.be.number
-        done()
-      })
-      .catch(done)
-  })
-
-  it.skip("handles large sets", function (done) {
-    ebay.GeteBayDetails().run()
-      .then( (res)=> {
-        // TODO: write 
-        done()
-      })
-      .catch(done)
-  })
-
-  /*ebay
-      .GetCategories()
-      .DetailLevel("ReturnAll")
+    ebay
+      .GetSuggestedCategories()
+      .Query("men's")
       .run()
       .then( res => {
+          expect(res.CategoryCount).to.be.a("number")
+          done()
+        })
+      .catch(done)
+  })
+
+  it("casts to Date", function (done) {
+    ebay
+      .GetBidderList()
+      .run()
+      .then( res =>  {
+        expect(res.Bidder.RegistrationDate).to.be.a("date")
+        done()
+      }).catch(done)
+  })
+
+  it.skip("does pagination", function (done) {
+    ebay
+      .GetCategories()           
+      .DetailLevel('ReturnAll')   
+      .LevelLimit(1)
+      .run( res => {
         console.log(res)
         done()
       })
-      .catch(done)*/
+      .catch(done)
+  })
+
+  it("handles pagination", function (done) {
+    ebay
+      .GetMyMessages()
+      .DetailLevel("ReturnMessages")
+      .run()
+      .then( res => {
+
+        expect(res.BidItemArray).to.be.an("array")
+        done()
+      })
+      .catch(done)
+  })
 
 })
 

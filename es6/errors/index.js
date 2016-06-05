@@ -36,8 +36,6 @@ export class No_Auth_Token_Error extends Error {
 
 /**
  * thrown when Request.prototype.run() is called without having defined an eBay API call
- *
- * @class      No_Call (name)
  */
 
 export class No_Call_Error extends Error {
@@ -46,12 +44,40 @@ export class No_Call_Error extends Error {
   }
 }
 
+/**
+ * thrown when attempting to change a setting that cannot be changed
+ *
+ * @param {String} setting    the setting that was attempted
+ */
+
 export class Setting_Error extends Error {
   constructor (setting) {
     super(`cannot configure "state.${setting}" at this time, are you trying to define a Global on a Request?`)
   }
 }
 
+export class Env_Error extends Error {
+  constructor (key) {
+    super(`could not find ${key} in process.env`)
+  }
+}
+
+
+/**
+ * Thrown when an Error occurs on eBay's side.
+ * Allows for easier control flow with Promises
+ * 
+ * @example
+ * 
+ * Ebay
+ *  .create(config)
+ *  .GetSellerList()
+ *  .run()
+ *  .catch(errors.Ebay.Api_Error, App.handleErr)
+ *  .catch( function (other_error) {
+ *    handle(other_error)
+ *  })
+ */
 export class Ebay_Api_Error extends Error {
   constructor (err) {
     super(err.LongMessage || err.ShortMessage)

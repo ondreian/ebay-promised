@@ -4,14 +4,12 @@
   "description": "promise wrapped Ebay requests with sensible response parsers",
   "main": "./lib/index.js",
   "dependencies": {
-    "async": "~1.5.2",
     "bluebird": "^3.4.0",
     "debug": "^2.1.1",
     "ecjson": "^0.1.2",
     "es6-error": "^3.0.0",
-    "lazy.js": "^0.4.2",
     "object-to-xml": "1.0.0",
-    "request-promise": "3.0.0",
+    "request-promise": "^3.0.0",
     "simple-rate-limiter": "^0.2.3"
   },
   "devDependencies": {
@@ -21,11 +19,12 @@
     "mocha": "^2.5.2"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel-register --check-leaks -t 20000",
-    "watch": "babel --watch --source-maps inline --out-dir=$npm_package_config_out $npm_package_config_in",
-    "test-watch": "mocha --compilers js:babel-register --check-leaks -t 20000 --watch --growl ./test/*.js",
+    "test": "mocha --compilers js:babel-register --check-leaks -t 20000 ./test/*.spec.js",
+    "watch": "npm run clean && babel --watch --source-maps inline --out-dir=$npm_package_config_out $npm_package_config_in",
+    "test-watch": "mocha --compilers js:babel-register --check-leaks -t 20000 --watch --growl ./test/*.spec.js",
     "compile": "babel --source-maps inline --out-dir=$npm_package_config_out $npm_package_config_in",
-    "preversion": "npm run compile"
+    "clean": "rm -rf $npm_package_config_out",
+    "preversion": "npm run clean && npm run compile"
   },
   "repository": {
     "type": "git",

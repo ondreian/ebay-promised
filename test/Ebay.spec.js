@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import Ebay     from '../lib'
 import fields   from '../lib/definitions/fields'
 import globals  from '../lib/definitions/globals'
-import calls    from '../lib/definitions/calls'
+import verbs    from '../lib/definitions/verbs'
 
 function builder (def, take=100) {
   const desc    = def.slice(0,take).sort( (a,b)=> b.length - a.length )
@@ -22,9 +22,9 @@ describe("Ebay", function () {
     })
   })
 
-  describe("Ebay ~ Calls", function () {
-    builder(calls).forEach( ([call, padding]) => {
-      it(`Ebay.prototype.${call}()${padding} -> return <Ebay.Request>`, ()=> {
+  describe("Ebay ~ Verbs", function () {
+    builder(verbs).forEach( ([verb, padding]) => {
+      it(`Ebay.prototype.${verb}()${padding} -> return <Ebay.Request>`, ()=> {
 
       })
     })
