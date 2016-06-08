@@ -10,7 +10,8 @@ process.env.EBAY_SANDBOX = true
 describe("Ebay vs eBay Sandbox API", function () {
   // Load encrypted creds on CI
   if (process.env.TRAVIS) {
-    Object.keys(require('./fixtures/auth.js')).forEach( v => process.env[v] = env[v] )
+    const env = require('./fixtures/auth.js')
+    Object.keys(env).forEach( v => process.env[v] = env[v] )
   }
 
   const ebay = Ebay.fromEnv()
