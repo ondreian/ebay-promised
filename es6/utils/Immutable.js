@@ -1,6 +1,9 @@
 /**
  * Immutable helpers
  * 
+ * This is a naive implementation since we only care about Objects
+ * If we move to handling Arrays we will need to account for that.
+ * 
  */
 export default class Immutable {
 

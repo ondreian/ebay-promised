@@ -21,7 +21,7 @@
   "scripts": {
     "test": "mocha --compilers js:babel-register --check-leaks -t 20000 ./test/*.spec.js",
     "watch": "npm run clean && babel --watch --source-maps inline --out-dir=$npm_package_config_out $npm_package_config_in",
-    "test-watch": "mocha --compilers js:babel-register --check-leaks -t 20000 --watch --growl ./test/*.spec.js",
+    "test:watch": "mocha --compilers js:babel-register --check-leaks -t 20000 --watch --growl ./test/*.spec.js",
     "compile": "babel --source-maps inline --out-dir=$npm_package_config_out $npm_package_config_in",
     "clean": "rm -rf $npm_package_config_out",
     "preversion": "npm run clean && npm run compile"

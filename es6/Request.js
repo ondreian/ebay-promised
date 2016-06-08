@@ -7,7 +7,7 @@ import limit       from "simple-rate-limiter"
 import {throws}    from "./errors"
 import Parser      from "./Parser"
 import range       from "./utils/range"
-import Immutable  from "./utils/Immutable"
+import Immutable   from "./utils/Immutable"
 
 // Definitions
 import Fields      from "./definitions/fields"
@@ -23,7 +23,7 @@ const day     = 24 * hour
 const PROD    = "production"
 const HEADING = 'xml version="1.0" encoding="utf-8"?'
 const LIST    = "List"
-const log     = debug("Ebay:Request")
+const log     = debug("ebay:request")
 /**
  * Immmutable request object for making eBay API verbs
  */
@@ -157,7 +157,7 @@ export default class Request {
 
     const payload  = this.fields
     const listKey  = this.listKey()
-    
+
     if (listKey !== false) {
       payload[ listKey ] = Immutable.merge( 
           payload[listKey]
@@ -169,6 +169,11 @@ export default class Request {
         [HEADING]    : null
       , [this.xmlns] : Immutable.merge(this.credentials, payload)
     })
+  }
+
+  tap (fn) {
+    fn.call(this, this)
+    return this
   }
 
   listKey () {
@@ -190,7 +195,6 @@ export default class Request {
   }
 
   invoke () {
-    // TODO: add deprecation message
     return this.run()
   }
 
@@ -200,8 +204,17 @@ export default class Request {
           url       : this.endpoint
         , headers   : this.headers
         , body      : this.xml(options)
-      }).once("limiter-exec",  promise => {
-        promise
+      }).once("limiter-exec",  req => {
+        req = Promise
+          .resolve(req)
+          .tap(log)
+
+        // resolve to raw XML
+        if (this.globals.raw) {
+          return req.then(resolve).catch(reject)
+        }
+
+        return req
           .then(Parser.toJSON)
           .then( json => Parser.unwrap(this, json) )
           .then(Parser.clean)
@@ -215,23 +228,25 @@ export default class Request {
     if ( !this.globals.authToken ) throws.No_Auth_Token_Error()
     if ( !this.verb )              throws.No_Call_Error()
 
-    return this.fetch(options)
+    return this
+      .fetch(options)
       .bind(this)
       .then(this.schedule)
   }
 
-  schedule (res) {
+  schedule (first) {
     // we aren't handling pagination
-    if (!res.pagination || res.pagination.pages < 2) return res
+    if (!first.pagination || first.pagination.pages < 2) return first
 
+    console.log(`beginning pagination for [2..${first.pagination.pages}]`)
     return Promise.mapSeries(
-        range(2, res.pagination.pages)
+        range(2, first.pagination.pages)
       , page => this.fetch({ page: page })
     ).then( results => {
       return results.reduce( (all, result) => {
-        all.results.concat( result.results )
+        all.results = all.results.concat( result.results )
         return all
-      }, { results: [] })
+      }, first)
     })
   }
 }

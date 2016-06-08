@@ -1,14 +1,13 @@
 import {expect}    from "chai"
+import Promise     from "bluebird"
 import Ebay        from "../lib"
-import * as errors from "../lib/errors"
-import Fields      from "../lib/definitions/fields"
-import Globals     from "../lib/definitions/globals"
-import Verbs       from "../lib/definitions/verbs"
 import Endpoints   from "../lib/definitions/endpoints"
+import * as errors from "../lib/errors"
+import * as mock   from './fixtures/generators'
 
 process.env.EBAY_SANDBOX = true
 
-describe("Ebay Functionality", function () {
+describe("Ebay vs eBay Sandbox API", function () {
   // Load encrypted creds on CI
   if (process.env.TRAVIS) {
     Object.keys(require('./fixtures/auth.js')).forEach( v => process.env[v] = env[v] )
@@ -16,7 +15,7 @@ describe("Ebay Functionality", function () {
 
   const ebay = Ebay.fromEnv()
 
-  it("is running in sanbox", function () {
+  it("is running in sandbox", function () {
     expect(ebay.GetAccount().endpoint).to.equal(Endpoints.Trading.sandbox, "COULD NOT FIND SANDBOX")
   })
 
@@ -39,7 +38,7 @@ describe("Ebay Functionality", function () {
       .GetBidderList()
       .run()
       .then( res => {
-        expect(res.BidItemArray).to.be.array
+        expect(res.results).to.be.an("array")
         done()
       })
       .catch(done)
@@ -47,10 +46,12 @@ describe("Ebay Functionality", function () {
 
   it("casts to Number", function (done) {
     ebay
+      .raw(true)
       .GetSuggestedCategories()
       .Query("men's")
       .run()
       .then( res => {
+          console.log(res)
           expect(res.CategoryCount).to.be.a("number")
           done()
         })
@@ -67,26 +68,19 @@ describe("Ebay Functionality", function () {
       }).catch(done)
   })
 
-  it.skip("does pagination", function (done) {
-    ebay
-      .GetCategories()           
-      .DetailLevel('ReturnAll')   
-      .LevelLimit(1)
-      .run( res => {
-        console.log(res)
-        done()
-      })
-      .catch(done)
-  })
-
   it("handles pagination", function (done) {
-    ebay
-      .GetMyMessages()
-      .DetailLevel("ReturnMessages")
-      .run()
-      .then( res => {
+    this.timeout( 1000 * 60 * 2 )
 
-        expect(res.BidItemArray).to.be.an("array")
+    ebay
+      .perPage(20)
+      .GetMyeBaySelling()
+      .ActiveList({ Include: true })
+      .DetailLevel("ReturnAll")
+      .run()
+      .then(res => {
+        expect(res.results).to.be.an("array")
+        expect(res.pagination.length).to.equal(res.results.length)
+        expect(res.results).to.be.have.length.greaterThan(1)
         done()
       })
       .catch(done)

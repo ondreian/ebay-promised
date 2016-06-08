@@ -1,8 +1,11 @@
 import Promise    from "bluebird"
 import ecjson     from "ecjson"
 import {throws}   from "./errors"
+import Immutable  from "./utils/Immutable"
 import Extraneous from "./definitions/extraneous"
 import dateNodes  from "./definitions/nodes.date"
+
+const ITERABLE_KEY = /Array|List/
 
 /**
  * A collection of pure methods that are used to parse eBay API responses
@@ -12,13 +15,14 @@ import dateNodes  from "./definitions/nodes.date"
  *  
  */
 export default class Parser {
+
   /**
    * converts an XML response to JSON
    *
    * @param      {XML}     xml     The xml
    * @return     {Promise}         resolves to a JSON representation of the HTML 
    */
-  static toJSON (xml) {
+  static toJSON ( xml ) {
     return new Promise( (resolve, reject)=> {
       ecjson.XmlToJson( xml, resolve )
     })
@@ -31,7 +35,7 @@ export default class Parser {
    * @param      {Call}    verb    The verb
    * @return     {Object}          The unwrapped verb
    */
-  static unwrap (req, json) {
+  static unwrap ( req, json ) {
     return Parser.flatten(json[ req.responseWrapper ])
   }
 
@@ -41,23 +45,21 @@ export default class Parser {
    * @param      {String}       value   The value
    * @return     {Date|Number}          The cast value
    */
-  static cast (value, key) {
+  static cast ( value, key ) {
     
-    if (!isNaN(value)) {
-      return Number(value)
+    if (!isNaN( value )) {
+      return Number( value )
     }
 
     if (value === "true" || value === "false") {
-      return Boolean(value)
+      return Boolean( value )
     }
 
     if (dateNodes[key.toLowerCase()]) {
-      return new Date(value)
+      return new Date( value )
     }
 
-
     return value
-
   }
 
   /**
@@ -67,13 +69,13 @@ export default class Parser {
    * @param      {<type>}  o       { parameter_description }
    * @return     {<type>}  { description_of_the_return_value }
    */
-  static flatten (o, key) {
+  static flatten ( o, key ) {
 
     if (o.value) {
       return Parser.cast(o.value, key)
     }
 
-    if (Array.isArray(o)) {
+    if (Array.isArray( o )) {
       return o.map(Parser.flatten)
     }
 
@@ -81,7 +83,7 @@ export default class Parser {
       return Parser.cast(o, key)
     }
 
-    return Object.keys(o).reduce( (deflated, key)=> {
+    return Object.keys( o ).reduce( (deflated, key)=> {
       deflated[key] = Parser.flatten(o[key], key)
       return deflated
     }, {})
@@ -89,69 +91,85 @@ export default class Parser {
   }
 
   /**
-   * Test if any member of an Array of keys matches a given pattern
-   *
-   * @param      {Array}   keys    The keys
-   * @param      {String}  str     The string
-   * @return     {String}          returns the key or false
-   */
-  static keyMatch (keys, str) {
-    keys = keys.slice(0)
-    while (keys.length) {
-      const key = keys.pop()
-      if (~key.indexOf(str)) return key
-    }
-    return false
-  }
-
-  /**
    * flattens the eBay pagination object to be easier to deal with
    *
-   * @param      {Object}  o       the JSON representation of a Response
-   * @return     {Object}          the friendly pagination extended Response
+   * @param      {Object}  obj    the JSON representation of a Response
+   * @return     {Object}         the friendly pagination extended Response
    */
-  static parsePagination (o) {
-    if ( !o.results.PaginationResult ) return o
+  static parsePagination ( obj ) {
+    if (!obj.PaginationResult) return {}
 
-    const info = o.results.PaginationResult
+    const p = obj.PaginationResult
+    delete obj.PaginationResult
 
-    o.pagination = {
-        pages : info.TotalNumberOfPages
-      , n     : info.TotalNumberOfEntries
-    }
-
-    delete o.results.PaginationResult
+    return { pagination: {
+        pages  : p.TotalNumberOfPages   || 0
+      , length : p.TotalNumberOfEntries || 0
+    }}
     
-    return o
   }
   /**
    * cleans the Ebay response up
    *
    * @param      {Object}  res     The response object
+   * @return     {Object}  res     The parsed response
    */
-  static clean (res) {
+  static clean ( res ) {
 
     if (res.Ack === "Error" || res.Ack === "Failure") {
       throws.Ebay_Api_Error(res.Errors)
     }
 
-    const rootKeys = Object.keys(res).filter( key => !~Extraneous.indexOf(key) )
-    const arrayKey = Parser.keyMatch(rootKeys, "Array")
-    const listKey  = Parser.keyMatch(rootKeys, "List")
+    // Drop extraneous keys
+    res = Object.keys( res )
+      .filter( key => !~Extraneous.indexOf( key ) )
+      .reduce( (acc, key) => {
+        acc[key] = res[key]
+        return acc
+      }, {})
 
-    const parsed = Parser.parsePagination(rootKeys.reduce( function _keyReducer (cleaned, key) {
-      // Ensure we always have an Iterable interface for things that should be iterable
-      if ( (~key.indexOf("Array") || ~key.indexOf("List")) && !Array.isArray(res[key]) ) {
-        cleaned.results[key] = []
-        return cleaned
+   return Parser.fold(res)
+  
+  }
+
+  static fold ( res ) {
+    return Object.keys(res).reduce( function (cleaned, key) {
+      const value = res[key]
+      if (key.match(/List/) ) {
+        return Immutable.merge(
+            cleaned
+          , Parser.parsePagination( value )
+          , Parser.getList( value )
+        )
       }
 
-      cleaned.results[key] = res[key]
-      return cleaned
-    }, { results : {} }))
+      if (key.match(/Array/)) {
+        return Immutable.merge(
+            cleaned
+          , Parser.getList( value )
+        )
+      }
 
-    if (!parsed.pagination) {
-      return parsed.results
-    }
+      cleaned[key] = value
+      return cleaned      
+    }, {})
   }
+
+  static getList (list) {
+    const parent  = Parser.getMatchingKey(list, "Array")
+    const wrapper = Object.keys(parent)[0]
+    const entries = parent[wrapper] || []
+    // Ensure we always have an Iterable interface for things that should be iterable
+    return { results: Array.isArray(entries) ? entries : [entries] }
+  }
+
+  static getMatchingKey (obj, substr) {
+    const keys = Object.keys(obj)
+    while (keys.length) {
+      const key = keys.pop()
+      if (~key.indexOf(substr)) return obj[key]
+    }
+    return obj
+  }
+
 }
