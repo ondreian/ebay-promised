@@ -47,12 +47,10 @@ describe("Ebay vs eBay Sandbox API", function () {
 
   it("casts to Number", function (done) {
     ebay
-      .raw(true)
       .GetSuggestedCategories()
       .Query("men's")
       .run()
       .then( res => {
-          console.log(res)
           expect(res.CategoryCount).to.be.a("number")
           done()
         })
