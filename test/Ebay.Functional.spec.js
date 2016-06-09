@@ -71,7 +71,7 @@ describe("Ebay vs eBay Sandbox API", function () {
     this.timeout( 1000 * 60 * 2 )
 
     ebay
-      .perPage(20)
+      .perPage(1)
       .GetMyeBaySelling()
       .ActiveList({ Include: true })
       .DetailLevel("ReturnAll")

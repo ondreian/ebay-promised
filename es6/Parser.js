@@ -112,7 +112,7 @@ export default class Parser {
    * cleans the Ebay response up
    *
    * @param      {Object}  res     The response object
-   * @return     {Object}  res     The parsed response
+   * @return     {Object}  res     The cleaned response
    */
   static clean ( res ) {
 
@@ -132,6 +132,12 @@ export default class Parser {
   
   }
 
+  /**
+   * recursively folds a response from eBay into something reasonable
+   *
+   * @param      {Object}  res     The resource
+   * @return     {Object}          The folded response
+   */
   static fold ( res ) {
     return Object.keys(res).reduce( function (cleaned, key) {
       const value = res[key]
@@ -155,6 +161,12 @@ export default class Parser {
     }, {})
   }
 
+  /**
+   * Gets the List element from an eBay response
+   *
+   * @param      {<type>}  list    The list
+   * @return     {Object}          The list.
+   */
   static getList (list) {
     const parent  = Parser.getMatchingKey(list, "Array")
     const wrapper = Object.keys(parent)[0]
@@ -163,6 +175,13 @@ export default class Parser {
     return { results: Array.isArray(entries) ? entries : [entries] }
   }
 
+  /**
+   * Gets the matching key.
+   *
+   * @param      {<type>}  obj     The object
+   * @param      {<type>}  substr  The substr to match
+   * @return     {<type>}          The matching key.
+   */
   static getMatchingKey (obj, substr) {
     const keys = Object.keys(obj)
     while (keys.length) {

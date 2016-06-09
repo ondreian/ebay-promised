@@ -1,5 +1,5 @@
 /**
- * A naive ascending inclusive range generator
+ * Ascending inclusive range generator
  * 
  * @param   {Integer}  min    the min value in the range
  * @param   {Integer}  max    the max value in the range

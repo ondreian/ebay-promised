@@ -30,10 +30,20 @@ const log     = debug("ebay:request")
 export default class Request {
 
   /**
-   * pure creation interface
+   * pure creation interface.  
+   * Generally not needed as the Ebay module delegates transparently to a Request instance
    *
    * @param      {Object}   state   The state
    * @return     {Request}  the new Request object
+   * @example
+   * 
+   *   Ebay
+   *    .create(config)
+   *    .GetMyeBaySelling()
+   *    .run()
+   *    .then(handleSuccess)
+   *    .catch(errors.Ebay_Api_Error, handleValidationError)
+   *    .catch(handleAllOtherErrors)
    */
   static create (state) {
     return new Request(state)
@@ -42,6 +52,7 @@ export default class Request {
   /**
    * creates the new Request object
    *
+   * @private
    * @param      {Object}  previous  The previous state
    */
   constructor ( previous = {} ) {
@@ -76,6 +87,7 @@ export default class Request {
   /**
    * returns the URL of the Request
    *
+   * @private
    * @return     {String}  the url
    */
   get endpoint () {
@@ -89,6 +101,7 @@ export default class Request {
   /**
    * returns a copy of the internal globals
    *
+   * @private
    * @return     {Object}  the globals
    */
   get globals () {
@@ -98,6 +111,7 @@ export default class Request {
   /**
    * returns an array of all the field names that have been added to the Request
    *
+   * @private
    * @return     {Array<String>}  the array of names
    */
   get fieldKeys () {
@@ -105,18 +119,9 @@ export default class Request {
   }
 
   /**
-   * returns key,value pair representation of the 
-   *
-   * @return     {Array<String,Any>} the pairs  
-   */
-  get fieldPairs () {
-    const fields = this.fields
-    return this.fieldKeys.map( field => [ field, fields[field] ] )
-  }
-
-  /**
    * returns a copy of the Request's fields
    *
+   * @private
    * @return     {Object}  the fields
    */
   get fields () {
@@ -126,6 +131,7 @@ export default class Request {
   /**
    * returns the expected name of XML node of a Request
    *
+   * @private
    * @return     {String}  { description_of_the_return_value }
    */
   get responseWrapper () {
@@ -133,26 +139,52 @@ export default class Request {
   }
 
   /**
-   * { function_description }
+   * returns the verb to use for this request
    *
-   * @return     {<type>}  { description_of_the_return_value }
+   * @private
+   * @return     {String}  the verb
    */
   get verb () {
     return this.state.verb
   }
 
+  /**
+   * returns the auth token for this request
+   * 
+   * @private
+   * @return     {String}  eBay Auth token
+   */
   get token () {
     return this.globals.authToken
   }
 
+  /**
+   * returns the XML structure for the SOAP auth
+   * 
+   * @private
+   * @return     {Object}  the SOAP
+   */
   get credentials () {
     return { RequesterCredentials: { eBayAuthToken: this.token } }
   }
 
+  /**
+   * returns the XML namespace
+   * 
+   * @private
+   * @return     {String}  the XML namespace from the verb
+   */
   get xmlns () {
     return `${this.verb}Request xmlns="urn:ebay:apis:eBLBaseComponents"`
   }
 
+  /**
+   * returns the XML document for the request
+   * 
+   * @private
+   * @param      {Object}  options  The options
+   * @return     {String}           The XML string of the Request
+   */
   xml (options = {}) {
 
     const payload  = this.fields
@@ -171,11 +203,22 @@ export default class Request {
     })
   }
 
+  /**
+   * convenience method for `tapping` the Request
+   *
+   * @param      {Function}  fn      The function to run
+   */
   tap (fn) {
     fn.call(this, this)
     return this
   }
 
+  /**
+   * determines if the Request uses a List and which key it is
+   *
+   * @private
+   * @return     {string|false}   the key that is a List  
+   */
   listKey () {
     const fields = this.fieldKeys
     while (fields.length) {
@@ -185,6 +228,12 @@ export default class Request {
     return false
   }
 
+  /**
+   * generates a pagination Object
+   *
+   * @param      {number}  page    The page to fetch
+   * @return     {Object}          The pagination representation
+   */
   pagination (page=1) {
     return {  
       Pagination: {
@@ -194,10 +243,24 @@ export default class Request {
     }
   }
 
+  /**
+   * alias for `run()`
+   *
+   * @deprecated
+   * @return     {Promise<Object>}   resolves to the response 
+   */
   invoke () {
     return this.run()
   }
 
+  /**
+   * runs the HTTP Post to eBay
+   *
+   * @private
+   * @param      {Object}   options  The options
+   * @return     {Promise}           resolves to the response
+   *
+   */
   fetch (options) {
     return new Promise( (resolve, reject)=> {
       Request.post({
@@ -224,6 +287,12 @@ export default class Request {
     })
   }
 
+  /**
+   * runs the current Request 
+   *
+   * @param      {<type>}  options  The options
+   * @return     {<type>}  { description_of_the_return_value }
+   */
   run (options = {}) {
     if ( !this.globals.authToken ) throws.No_Auth_Token_Error()
     if ( !this.verb )              throws.No_Call_Error()
@@ -234,6 +303,13 @@ export default class Request {
       .then(this.schedule)
   }
 
+  /**
+   * schedules pagination requests
+   * 
+   * @private
+   * @param      {Object}   first   The first response from the API
+   * @return     {Promise}          resolves to the first resposne or the concatenated Responses
+   */
   schedule (first) {
     // we aren't handling pagination
     if (!first.pagination || first.pagination.pages < 2) return first

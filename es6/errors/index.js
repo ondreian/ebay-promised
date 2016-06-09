@@ -56,6 +56,9 @@ export class Setting_Error extends Error {
   }
 }
 
+/**
+ * thrown when attempting to load environment variables that don't exist
+ */
 export class Env_Error extends Error {
   constructor (key) {
     super(`could not find ${key} in process.env`)
