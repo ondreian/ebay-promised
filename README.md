@@ -1,5 +1,8 @@
 # A Promise-based module for working with the eBay API
 
+[![Build Status](https://travis-ci.org/ondreian/ebay-promised.svg?branch=master)](https://travis-ci.org/ondreian/ebay-promised)
+[![Documentation](https://doc.esdoc.org/github.com/ondreian/ebay-promised/badge.svg)](https://doc.esdoc.org/github.com/ondreian/ebay-promised/)
+
 `npm install ebay-promised --save`
 
 This module provides a succint, verbose way to build requests with the eBay API.
