@@ -61,6 +61,7 @@ export default class Ebay {
    * @return      null
    */
   invoke () {
+     console.warn("deprecation warning :: the .invoke() method has been migrated to .run() and will be removed in the next major release")
     return this.run()
   }
 

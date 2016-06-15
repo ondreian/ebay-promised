@@ -250,6 +250,7 @@ export default class Request {
    * @return     {Promise<Object>}   resolves to the response 
    */
   invoke () {
+    console.warn("deprecation warning :: the .invoke() method has been migrated to .run() and will be removed in the next major release")
     return this.run()
   }
 
@@ -321,7 +322,8 @@ export default class Request {
     // we aren't handling pagination
     if (!first.pagination || first.pagination.pages < 2) return first
 
-    console.log(`beginning pagination for [2..${first.pagination.pages}]`)
+    log(`beginning pagination for [2..${first.pagination.pages}]`)
+    
     return Promise.mapSeries(
         range(2, first.pagination.pages)
       , page => this.fetch({ page: page })
