@@ -267,6 +267,13 @@ export default class Request {
           url       : this.endpoint
         , headers   : this.headers
         , body      : this.xml(options)
+        // Hotfix for OpenSSL issue
+        // https://github.com/openssl/openssl/pull/852
+        // https://github.com/nodejs/node/issues/3692
+        , agentOptions: { 
+              ciphers        : 'ALL'
+            , secureProtocol : 'TLSv1_method'
+          }
       }).once("limiter-exec",  req => {
         req = Promise
           .resolve(req)
