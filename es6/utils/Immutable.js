@@ -1,3 +1,4 @@
+// @flow
 /**
  * Immutable helpers
  * 
@@ -13,7 +14,7 @@ export default class Immutable {
    * @param      {Array}   objects  The objects to merge
    * @return     {Object}           The result
    */ 
-  static merge (...objects) {
+  static merge (...objects: Object[]): Object {
     return Object.assign.apply(null, [{}].concat(objects))
   }
 
@@ -23,7 +24,7 @@ export default class Immutable {
    * @param      {Object}  obj     The object to copy
    * @return     {Object}          The copy
    */
-  static copy (obj) {
+  static copy (obj: Object): Object {
     return Object.assign({}, obj)
   }
 

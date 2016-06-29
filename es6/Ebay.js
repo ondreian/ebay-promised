@@ -1,3 +1,4 @@
+// @flow
 import Request   from "./Request"
 import {throws}  from "./errors"
 import Immutable from "./utils/Immutable"
@@ -9,22 +10,34 @@ import Globals   from "./definitions/globals"
 import Verbs     from "./definitions/verbs"
 
 export default class Ebay {
+  globals  : Object
+  
+  defaults : Object = {
+      serviceName  : "Trading"
+    , sandbox      : false
+    , site         : 0
+    , raw          : false      // return raw XML -> JSON response from Ebay
+    , perPage      : 100
+  }
+  
+  static Request : Request = Request
+  
   /**
    * pure creation interface useful for iterations and other places where context may be lost
    *
-   * @return     {this}  a new Ebay instance
+   * @return     {Ebay}  a new Ebay instance
    */
-  static create ( settings ) {
+  static create ( settings: Object = {}) : Ebay {
     return new Ebay( settings )
   }
 
   /**
    * Loads credentials from `process.env`
    * 
-   * @return {this}          a new Ebay instance
+   * @return {Ebay}          a new Ebay instance
    * @throws {Env_Error}
    */
-  static fromEnv () {
+  static fromEnv () : Ebay {
     return Ebay.create({
         authToken : process.env.EBAY_TOKEN   || throws.Env_Error("EBAY_TOKEN")
       , cert      : process.env.EBAY_CERT    || throws.Env_Error("EBAY_CERT")
@@ -35,16 +48,16 @@ export default class Ebay {
   }
 
   /**
-   * 
+   * creates the immutable Ebay instance that everything else resolves from
    *
    * @param      {Object}  settings the global settings
    * @return     {Ebay}
    */
-  constructor ( settings ) {
+  constructor ( settings: Object ) {
     /**
      * global settings for all following Ebay requests
      */
-    this.globals  = Immutable.merge(Ebay.defaults, settings)
+    this.globals: Object  = Immutable.merge(Ebay.defaults, settings)
     /**
      * insure an error is thrown if internals are changed
      * allows for better assertions about the statefulness 
@@ -60,8 +73,8 @@ export default class Ebay {
    * @throws     {Error}
    * @return      null
    */
-  invoke () {
-     console.warn("deprecation warning :: the .invoke() method has been migrated to .run() and will be removed in the next major release")
+  invoke () : void {
+    console.warn("deprecation warning :: the .invoke() method has been migrated to .run() and will be removed in the next major release")
     return this.run()
   }
 
@@ -71,21 +84,11 @@ export default class Ebay {
    * @throws {Error} 
    * @return null
    */
-  run () {
+  run (): void {
     throws.Error("Cannot run an empty Request, please define an eBay verb or field")
   }
 }
 
-/**
- * defaults for eBay API
- */
-Ebay.defaults = {
-    serviceName  : "Trading"
-  , sandbox      : false
-  , site         : 0
-  , raw          : false      // return raw XML -> JSON response from Ebay
-  , perPage      : 100
-}
 
 /**
  * reference to the {Request} class
