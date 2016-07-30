@@ -55,7 +55,7 @@ export default class Parser {
       return Boolean( value )
     }
 
-    if (dateNodes[key.toLowerCase()]) {
+    if (typeof key === 'string' && dateNodes[key.toLowerCase()]) {
       return new Date( value )
     }
 
