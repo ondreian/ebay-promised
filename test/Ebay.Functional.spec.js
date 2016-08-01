@@ -7,7 +7,7 @@ import * as mock   from './fixtures/generators'
 
 process.env.EBAY_SANDBOX = true
 
-describe("Ebay vs eBay Sandbox API", function () {
+describe("<Ebay> => Functional Testing", function () {
   // Load encrypted creds on CI
 
   const env = require('./fixtures/auth.private.js')
@@ -83,7 +83,6 @@ describe("Ebay vs eBay Sandbox API", function () {
       .perPage(1)
       .GetMyeBaySelling()
       .ActiveList({ Include: true })
-      .DetailLevel("ReturnAll")
       .run()
       .then(res => {
         // collect listing ids for deletion
@@ -99,7 +98,7 @@ describe("Ebay vs eBay Sandbox API", function () {
   it("deletes listings", function (done){
     return Promise.resolve(listingIds)
       .map( id => ebay.ItemID(id).EndingReason("LostOrBroken").EndFixedPriceItem() )
-      .map( req => req.run() )
+      .map( req => req.run().catch(errors.Ebay_Api_Error, err => null ) )
       .then( _ => done() )
       .catch(done)
   })
