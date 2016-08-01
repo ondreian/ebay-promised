@@ -35,7 +35,7 @@ describe("<Ebay> => Functional Testing", function () {
 
   it("lists items", function (done) {
     const items = Array(3).fill(0).map(mock.Item)
-    return Promise.resolve(items)
+    Promise.resolve(items)
       .map( item => ebay.Item(item).AddFixedPriceItem().run() )
       .then( _ => done() )
       .catch(done)
@@ -96,7 +96,7 @@ describe("<Ebay> => Functional Testing", function () {
   })
 
   it("deletes listings", function (done){
-    return Promise.resolve(listingIds)
+    Promise.resolve(listingIds)
       .map( id => ebay.ItemID(id).EndingReason("LostOrBroken").EndFixedPriceItem() )
       .map( req => req.run().catch(errors.Ebay_Api_Error, err => null ) )
       .then( _ => done() )
