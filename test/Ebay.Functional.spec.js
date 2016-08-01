@@ -14,7 +14,7 @@ describe("Ebay vs eBay Sandbox API", function () {
     Object.keys(env).forEach( v => process.env[v] = env[v] )
   }
 
-  //const ebay = Ebay.fromEnv()
+  const ebay = Ebay.fromEnv()
 
   it("is running in sandbox", function () {
     expect(ebay.GetAccount().endpoint).to.equal(Endpoints.Trading.sandbox, "COULD NOT FIND SANDBOX")
@@ -34,7 +34,7 @@ describe("Ebay vs eBay Sandbox API", function () {
   
   })
 
-  it.only("lists items", function (done) {
+  it("lists items", function (done) {
     const items = Array(3).fill(0).map(mock.Item)
     
     Promise.resolve(items)
