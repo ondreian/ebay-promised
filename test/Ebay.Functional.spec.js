@@ -36,10 +36,10 @@ describe("Ebay vs eBay Sandbox API", function () {
 
   it("lists items", function (done) {
     const items = Array(3).fill(0).map(mock.Item)
-    
-    Promise.resolve(items)
+  
+    return Promise.resolve(items)
       .map( item => ebay.AddFixedPricedItem )
-      .then(done)
+      .then( _ => done() )
       .catch(done)
   })
 
