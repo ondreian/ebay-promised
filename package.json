@@ -9,7 +9,7 @@
     "ecjson": "^0.1.2",
     "es6-error": "^3.0.1",
     "object-to-xml": "1.0.0",
-    "request-promise": "^3.0.0",
+    "request-promise": "^4.0.1",
     "simple-rate-limiter": "^0.2.3"
   },
   "devDependencies": {
