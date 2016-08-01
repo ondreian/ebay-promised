@@ -86,7 +86,6 @@ describe("Ebay vs eBay Sandbox API", function () {
       .DetailLevel("ReturnAll")
       .run()
       .then(res => {
-        console.log(res)
         expect(res.results).to.be.an("array")
         expect(res.pagination.length).to.equal(res.results.length)
         expect(res.results).to.be.have.length.greaterThan(1)
