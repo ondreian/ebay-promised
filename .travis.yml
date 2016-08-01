@@ -10,4 +10,6 @@ before_script:
 script: npm test
 before_install:
 - openssl aes-256-cbc -K $encrypted_33608139a618_key -iv $encrypted_33608139a618_iv
+  -in test/fixtures/auth.private.js.enc -out test/fixtures/auth.private.js -d
+- openssl aes-256-cbc -K $encrypted_33608139a618_key -iv $encrypted_33608139a618_iv
   -in ./test/fixtures/auth.private.js.enc -out ./test/fixtures/auth.private.js -d
