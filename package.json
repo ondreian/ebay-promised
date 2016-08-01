@@ -26,7 +26,8 @@
     "compile": "babel --source-maps inline --out-dir=$npm_package_config_out $npm_package_config_in",
     "clean": "rm -rf $npm_package_config_out",
     "encrypt": "travis encrypt-file test/fixtures/auth.private.js test/fixtures/auth.private.js.enc --add",
-    "preversion": "npm run clean && npm run compile"
+    "preversion": "npm run clean && npm run compile",
+    "postpublish": "git push --tags"
   },
   "repository": {
     "type": "git",
