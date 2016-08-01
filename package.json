@@ -24,6 +24,7 @@
     "test:watch": "mocha --compilers js:babel-register --check-leaks -t 20000 --watch --growl ./test/*.spec.js",
     "compile": "babel --source-maps inline --out-dir=$npm_package_config_out $npm_package_config_in",
     "clean": "rm -rf $npm_package_config_out",
+    "encrypt": "travis encrypt-file test/fixtures/auth.private.js test/fixtures/auth.private.js.enc --add",
     "preversion": "npm run clean && npm run compile"
   },
   "repository": {

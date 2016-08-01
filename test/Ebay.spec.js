@@ -4,7 +4,7 @@ import Fields   from '../lib/definitions/fields'
 import Globals  from '../lib/definitions/globals'
 import Verbs    from '../lib/definitions/verbs'
 
-describe("Ebay", function () {
+describe("<Ebay>", function () {
   it("Ebay ~ Globals", function () {
     Globals.forEach( global => {     
       expect(Ebay).to.respondTo(global)
