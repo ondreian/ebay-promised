@@ -7,12 +7,11 @@ import * as mock   from './fixtures/generators'
 
 process.env.EBAY_SANDBOX = true
 
-describe("Ebay vs eBay Sandbox API", function () {
+describe("<Ebay> => Functional Testing", function () {
   // Load encrypted creds on CI
-  if (process.env.TRAVIS) {
-    const env = require('./fixtures/auth.js')
-    Object.keys(env).forEach( v => process.env[v] = env[v] )
-  }
+
+  const env = require('./fixtures/auth.private.js')
+  Object.keys(env).forEach( v => process.env[v] = env[v] )
 
   const ebay = Ebay.fromEnv()
 
@@ -32,6 +31,14 @@ describe("Ebay vs eBay Sandbox API", function () {
         done()
       })
   
+  })
+
+  it("lists items", function (done) {
+    const items = Array(3).fill(0).map(mock.Item)
+    return Promise.resolve(items)
+      .map( item => ebay.Item(item).AddFixedPriceItem().run() )
+      .then( _ => done() )
+      .catch(done)
   })
 
   it("handles Lists", function (done) {
@@ -67,6 +74,8 @@ describe("Ebay vs eBay Sandbox API", function () {
       }).catch(done)
   })
 
+  let listingIds = []
+
   it("handles pagination", function (done) {
     this.timeout( 1000 * 60 * 2 )
 
@@ -74,9 +83,10 @@ describe("Ebay vs eBay Sandbox API", function () {
       .perPage(1)
       .GetMyeBaySelling()
       .ActiveList({ Include: true })
-      .DetailLevel("ReturnAll")
       .run()
       .then(res => {
+        // collect listing ids for deletion
+        res.results.forEach( listing => listingIds.push(listing.ItemID) )
         expect(res.results).to.be.an("array")
         expect(res.pagination.length).to.equal(res.results.length)
         expect(res.results).to.be.have.length.greaterThan(1)
@@ -85,5 +95,12 @@ describe("Ebay vs eBay Sandbox API", function () {
       .catch(done)
   })
 
+  it("deletes listings", function (done){
+    return Promise.resolve(listingIds)
+      .map( id => ebay.ItemID(id).EndingReason("LostOrBroken").EndFixedPriceItem() )
+      .map( req => req.run().catch(errors.Ebay_Api_Error, err => null ) )
+      .then( _ => done() )
+      .catch(done)
+  })
 })
 
