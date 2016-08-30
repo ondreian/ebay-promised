@@ -4,7 +4,7 @@
   "description": "promise wrapped Ebay requests with sensible response parsers",
   "main": "./lib/index.js",
   "dependencies": {
-    "bluebird": "^3.4.0",
+    "bluebird": "^3.4.4",
     "debug": "^2.1.1",
     "ecjson": "^0.1.2",
     "es6-error": "^3.0.1",
