@@ -47,13 +47,11 @@ export default class Parser {
    */
   static cast ( value, key ) {
     
-    if (!isNaN( value )) {
-      return Number( value )
-    }
+    if (!isNaN( value ))   return Number( value )
 
-    if (value === "true" || value === "false") {
-      return Boolean( value )
-    }
+    if (value === "true")  return true
+
+    if (value === "false") return false
 
     if (typeof key === 'string' && dateNodes[key.toLowerCase()]) {
       return new Date( value )
@@ -66,8 +64,8 @@ export default class Parser {
    * recursively flattens `value` keys in the XML -> JSON conversion
    * we can do this because we don't need to worry about XML attributes from eBay
    *
-   * @param      {<type>}  o       { parameter_description }
-   * @return     {<type>}  { description_of_the_return_value }
+   * @param      {Object}  o       the object output from the XML parser
+   * @return     {Object}          the flattened output
    */
   static flatten ( o, key ) {
 
