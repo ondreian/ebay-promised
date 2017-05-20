@@ -23,6 +23,7 @@ const day     = 24 * hour
 const PROD    = "production"
 const HEADING = 'xml version="1.0" encoding="utf-8"?'
 const LIST    = "List"
+const LISTING = "Listing"
 const log     = debug("ebay:request")
 /**
  * Immmutable request object for making eBay API verbs
@@ -223,7 +224,7 @@ export default class Request {
     const fields = this.fieldKeys
     while (fields.length) {
       const field = fields.pop()
-      if ( ~field.indexOf(LIST) ) return field
+      if ( ~field.indexOf(LIST) && !field.indexOf(LISTING) ) return field
     }
     return false
   }
