@@ -224,7 +224,8 @@ export default class Request {
     const fields = this.fieldKeys
     while (fields.length) {
       const field = fields.pop()
-      if ( ~field.indexOf(LIST) && !field.indexOf(LISTING) ) return field
+      if (~field.indexOf(LISTING)) continue
+      if (~field.indexOf(LIST)) return field
     }
     return false
   }
