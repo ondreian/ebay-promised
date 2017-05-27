@@ -7,7 +7,7 @@
     "bluebird": "^3.4.0",
     "debug": "^2.1.1",
     "ecjson": "^0.1.2",
-    "es6-error": "^3.0.1",
+    "es6-error": "^3.2.0",
     "object-to-xml": "1.0.0",
     "request": "^2.74.0",
     "request-promise": "^4.1.0",
