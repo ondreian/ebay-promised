@@ -62,6 +62,11 @@ describe("<Ebay.Request>", function () {
     expect(req.endpoint).to.equal(Endpoints.Trading.production)
   })
 
+  it("does not cast Listing prefixed keys to Array (issue #47)", function () {
+    const req = Ebay.create().GetOrders().ListingType("fake")
+    expect(req.listKey()).to.equal(false)
+  })
+
   it.skip("Queues and rate limits", function () {
     expect(Ebay.Request).to.have.property("RATELIMIT")
   })
