@@ -1,9 +1,10 @@
-import Promise    from "bluebird"
-import ecjson     from "ecjson"
-import {throws}   from "./errors"
-import Immutable  from "./utils/Immutable"
-import Extraneous from "./definitions/extraneous"
-import dateNodes  from "./definitions/nodes.date"
+import Promise      from "bluebird"
+import ecjson       from "ecjson"
+import {throws}     from "./errors"
+import Immutable    from "./utils/Immutable"
+import Extraneous   from "./definitions/extraneous"
+import dateNodes    from "./definitions/nodes.date"
+import numericNodes from "./definitions/nodes.numeric"
 
 const ITERABLE_KEY = /Array|List/
 
@@ -12,7 +13,7 @@ const ITERABLE_KEY = /Array|List/
  * should generally be bound to a Request via:
  *   `Function.prototype.bind`
  *   `Promise.prototype.bind`
- *  
+ *
  */
 export default class Parser {
 
@@ -20,7 +21,7 @@ export default class Parser {
    * converts an XML response to JSON
    *
    * @param      {XML}     xml     The xml
-   * @return     {Promise}         resolves to a JSON representation of the HTML 
+   * @return     {Promise}         resolves to a JSON representation of the HTML
    */
   static toJSON ( xml ) {
     return new Promise( (resolve, reject)=> {
@@ -46,15 +47,19 @@ export default class Parser {
    * @return     {Date|Number}          The cast value
    */
   static cast ( value, key ) {
-    
-    if (!isNaN( value ))   return Number( value )
 
     if (value === "true")  return true
 
     if (value === "false") return false
 
-    if (typeof key === 'string' && dateNodes[key.toLowerCase()]) {
-      return new Date( value )
+    if (key) {
+      if (typeof key === 'string' && dateNodes[key.toLowerCase()]) {
+        return new Date( value )
+      }
+
+      if (!isNaN( value ) && numericNodes[key.toLowerCase()]) {
+        return Number( value )
+      }
     }
 
     return value
@@ -85,7 +90,7 @@ export default class Parser {
       deflated[key] = Parser.flatten(o[key], key)
       return deflated
     }, {})
-    
+
   }
 
   /**
@@ -101,10 +106,10 @@ export default class Parser {
     delete obj.PaginationResult
 
     return { pagination: {
-        pages  : p.TotalNumberOfPages   || 0
-      , length : p.TotalNumberOfEntries || 0
+        pages  : Number(p.TotalNumberOfPages)   || 0
+      , length : Number(p.TotalNumberOfEntries) || 0
     }}
-    
+
   }
   /**
    * cleans the Ebay response up
@@ -127,7 +132,7 @@ export default class Parser {
       }, {})
 
    return Parser.fold(res)
-  
+
   }
 
   /**
@@ -155,7 +160,7 @@ export default class Parser {
       }
 
       cleaned[key] = value
-      return cleaned      
+      return cleaned
     }, {})
   }
 

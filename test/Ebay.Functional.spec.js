@@ -54,7 +54,7 @@ describe("<Ebay> => Functional Testing", function () {
 
   })
 
-  it("lists items", function (done) {
+  it("creates listings", function (done) {
     const items = Array(3).fill(0).map(mock.Item)
     Promise.resolve(items)
       .map( item => ebay.Item(item).AddFixedPriceItem().run() )
@@ -73,7 +73,7 @@ describe("<Ebay> => Functional Testing", function () {
       .catch(done)
   })
 
-  it("casts to Number", function (done) {
+  it("casts CategoryCount to Number", function (done) {
     ebay
       .GetSuggestedCategories()
       .Query("men's")
