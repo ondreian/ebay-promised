@@ -10,10 +10,31 @@ process.env.EBAY_SANDBOX = true
 describe("<Ebay> => Functional Testing", function () {
   // Load encrypted creds on CI
 
-  const env = require('./fixtures/auth.private.js')
-  Object.keys(env).forEach( v => process.env[v] = env[v] )
+  let env;
+  try {
+    env = require('./fixtures/auth.private.js')
+    Object.keys(env).forEach( v => process.env[v] = env[v] )
+  } catch (err) {
+    // pass
+  }
 
-  const ebay = Ebay.fromEnv()
+  let ebay;
+  try {
+    ebay = Ebay.fromEnv();
+  } catch (err) {
+    console.warn(`
+      Unable to initialize Ebay object, skipping functional tests.
+      Need environment or test/fixtures/auth.private.js containing:
+      EBAY_APP_ID, EBAY_DEV_ID, EBAY_CERT, EBAY_TOKEN
+    `);
+  }
+  const skipTests = !ebay;
+
+  before(function () {
+    if (skipTests) {
+      this.skip();
+    }
+  });
 
   it("is running in sandbox", function () {
     expect(ebay.GetAccount().endpoint).to.equal(Endpoints.Trading.sandbox, "COULD NOT FIND SANDBOX")
@@ -30,7 +51,7 @@ describe("<Ebay> => Functional Testing", function () {
         expect(err).to.be.instanceOf(errors.Ebay_Api_Error)
         done()
       })
-  
+
   })
 
   it("lists items", function (done) {
@@ -103,4 +124,3 @@ describe("<Ebay> => Functional Testing", function () {
       .catch(done)
   })
 })
-
