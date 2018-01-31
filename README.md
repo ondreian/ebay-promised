@@ -24,7 +24,7 @@ Most of the other services are GET based and query string driven.
 
 ## How to use this module
 
-Readinging through the [Functional Tests](/test/Ebay.Functional.spec.js) is a great way to familiarize yourself with some common API calls.
+Reading through the [Functional Tests](/test/Ebay.Functional.spec.js) is a great way to familiarize yourself with some common API calls.
 
 ```javascript
 # Basic Setup
@@ -37,12 +37,12 @@ const {err} = Ebay.errors
 
 ebay
   .GetMyeBaySelling()            // Transforms it to a sealed Request, global config can no longer change
-  .ActiveList({ Include: true }) // Pass in a field,value 
+  .ActiveList({ Include: true }) // Pass in a field,value
   .DetailLevel("ReturnAll")      // Pass in another field, value
   .run()                         // Run the request against the eBay API
   .then(handleSuccess)
   .catch(err.Ebay_Api_Error, err => {
-    // this error is a special case 
+    // this error is a special case
     // it means your HTTP request was successful but eBay did not like it
   })
   .catch( err = {
@@ -69,3 +69,36 @@ Internally ebay-promised will attempt to detect when a request is paginated and 
 ### Utility methods
 
 Pull requests are welcome.
+
+## Development
+
+### Building
+To build the library (using bash):
+````
+set npm_package_config_in=es6
+set npm_package_config_out=lib
+npm run compile
+````
+
+### Testing
+To run tests:
+
+For functional testing, you must have an eBay API Sandbox id setup, with correct keys and tokens. See [Application Keys](https://developer.ebay.com/my/keys) for details.
+Once you have the application keys, also click "User Tokens" on the same page, to set up or obtain your user authorization token.
+
+Place these tokens into a file called test/fixtures/auth.private.js, exported as follows:
+
+````
+module.exports = {
+    EBAY_APP_ID: 'YourAppId',
+    EBAY_DEV_ID: 'YourDevId',
+    EBAY_CERT: 'YourCertificate',
+    EBAY_TOKEN: 'YourUserAuthToken',
+};
+````
+
+and then:
+
+````
+npm test
+````
